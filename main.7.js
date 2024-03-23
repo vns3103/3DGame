@@ -848,14 +848,69 @@ function start(){
 	}
 
 	function handleKeys() {
-	
+
+		//emotiv
+		let socketUrl = 'wss://localhost:6868'
+		let user = {
+			"license":"", //can be empty
+			"clientId":"wCw3FvcO0JGR1a3KxY0PM2Z5lMHfnFePsaN0raoZ",  //add your clientId for your cortex App
+			"clientSecret":"IyuUHMKWfguSpIUBpzsD8Np6whsWK7BQZTVLgORe53acrBn61Zfmj5K7UOx0TuQULAaZsIYTRCiY9mGUADpLc1RwtSMnZid9aJpnhrMFx9xd9QYmMB0yhWAl5G8qDgRV",  //add the client secret
+			"debit":0
+		}
+		let c = new Cortex(user, socketUrl)
+		c.live('lift', 0.35) //change to a different command you've trained and change sensitivity level that trigger the command
+	  
+		if (currentlyPressedKeys[67]) // (C) debug
+		{
+			// debug scene
+			RC.scene.traverse(function(o){
+			});
+		}	
+		  // Chart
+		  var command1 = new TimeSeries();
+		  var command2 = new TimeSeries();
+		  setInterval(function() {
+			if (c.currentAction[0]=='lift') {command2.append(new Date(c.currentAction[2] * 1000), c.currentAction[1])} else {command2.append(new Date(c.currentAction[2] * 1000), 0)};
+			if (c.currentAction[0]=='pull') {command1.append(new Date(c.currentAction[2] * 1000), c.currentAction[1])} else {command1.append(new Date(c.currentAction[2] * 1000), 0)};
+			console.log(c.currentAction);
+			// after making threejs game, we have to control it like this. Refer mouse triggers in threejs
+			if(c.currentAction[0] == "drop")
+			{
+				avion.brake(100);
+			particleLifetime = Math.max(particleLifetime - 0.1, 0);
+            cone.lifeTimeInterval = new MathExt.Interval_Class(0.1, particleLifetime);
+            particleSize = Math.max(particleSize - 0.1, 0);
+            cone.sizeInterval = new MathExt.Interval_Class(1.0, particleSize);
+			}
+			if(c.currentAction[0] == "push")
+			{
+
+			avion.goFront(200,200);
+		 	particleLifetime = Math.min(particleLifetime + 0.1, 2.0);
+		 	particleSize = Math.min(particleSize + 0.1, 2.0);
+		 	cone.lifeTimeInterval = new MathExt.Interval_Class(0.1, particleLifetime);
+            cone.sizeInterval = new MathExt.Interval_Class(1.0, particleSize);
+			}
+			if(c.currentAction[0] == "left")
+			{
+
+			avion.turnLeft(200) ;
+			}
+			if(c.currentAction[0] == "right")
+			{
+		
+			avion.turnRight(200) ;	
+			}
+		  }, 500);
+
+		  //keyboard
 		if (currentlyPressedKeys[67]) // (C) debug
 		{
 			// debug scene
 			RC.scene.traverse(function(o){
 			});
 		}		
-		if (currentlyPressedKeys[75]) // (K) Right	
+		if (currentlyPressedKeys[68]) // (D) Right	
 			avion3.add(RC.camera) ;
 		if (currentlyPressedKeys[76]) // (L) Right
 			voitureAuto3.add(RC.camera) ;
@@ -863,13 +918,13 @@ function start(){
 			corpsHelico.add(RC.camera) ;	
 		if (currentlyPressedKeys[68]) // (D) Right
 		{
-			avion.turnRight(1000) ;	
+			avion.turnRight(1000) ;	s
 		}
-		if (currentlyPressedKeys[81]) // (Q) Left 
+		if (currentlyPressedKeys[65]) // (A) Left 
 		{		
 			avion.turnLeft(1000) ;
 		}
-		if (currentlyPressedKeys[90]) // (Z) Up
+		if (currentlyPressedKeys[87]) // (W) Up
 		{
 		 	avion.goFront(1200,1200);
 		 	particleLifetime = Math.min(particleLifetime + 0.1, 2.0);
@@ -1102,18 +1157,18 @@ function start(){
 				vide.position.y = 0.0 ;
 				vide.rotation.x = 100.0*3.14159/180.0 ;
 				if(lapAvion==3){
-					var text = new THREE.TextGeometry( "Fin du jeu",{size:2,height:1,curveSegments: 2});			
+					var text = new THREE.TextGeometry( "Finished",{size:2,height:1,curveSegments: 2});			
 					var textMesh = new THREE.Mesh(text,meshMaterial);
 					vide.add(textMesh);
 					cancelAnimationFrame( id );
 				}
 				else{
-				var text = new THREE.TextGeometry( "Tours : " +lapAvion,{size:2,height:1,curveSegments: 2});			
+				var text = new THREE.TextGeometry( "Laps : " +lapAvion,{size:2,height:1,curveSegments: 2});			
 				var textMesh = new THREE.Mesh(text,meshMaterial);
 				vide.add(textMesh);
 				}
 				var temps = new THREE.Object3D();
-				temps.name = 'temps'+lapAvion;
+				temps.name = 'time'+lapAvion;
 				avion3.add(temps) ;
 				temps.position.x = 7.0 ;
 				temps.position.z = 23.0 ;
